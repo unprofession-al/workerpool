@@ -17,11 +17,7 @@ type Pool struct {
 	bar *uiprogress.Bar
 }
 
-type Job interface {
-	Run(*sync.WaitGroup)
-}
-
-func NewPool(concurrency int) *Pool {
+func New(concurrency int) *Pool {
 	return &Pool{
 		concurrency: concurrency,
 		jobChan:     make(chan func()),
