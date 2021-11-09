@@ -2,6 +2,7 @@ package workerpool
 
 import (
 	"fmt"
+	"io"
 	"sync"
 
 	"github.com/gosuri/uiprogress"
@@ -14,14 +15,20 @@ type Pool struct {
 	jobChan     chan func()
 	wg          sync.WaitGroup
 
-	bar *uiprogress.Bar
+	bar    *uiprogress.Bar
+	barOut io.Writer
 }
 
 func New(concurrency int) *Pool {
 	return &Pool{
 		concurrency: concurrency,
 		jobChan:     make(chan func()),
+		barOut:      nil,
 	}
+}
+
+func (p *Pool) SetBarOut(o io.Writer) {
+	p.barOut = o
 }
 
 func (p *Pool) Add(job func()) {
@@ -29,8 +36,13 @@ func (p *Pool) Add(job func()) {
 }
 
 func (p *Pool) Run(progress bool) {
+	var pgrs *uiprogress.Progress
 	if progress {
-		uiprogress.Start()
+		pgrs = uiprogress.New()
+		if p.barOut != nil {
+			pgrs.SetOut(p.barOut)
+		}
+		pgrs.Start()
 		p.bar = uiprogress.AddBar(len(p.jobs))
 		p.bar.AppendCompleted()
 		p.bar.PrependElapsed()
@@ -54,8 +66,8 @@ func (p *Pool) Run(progress bool) {
 
 	p.wg.Wait()
 
-	if progress {
-		uiprogress.Stop()
+	if pgrs != nil {
+		pgrs.Stop()
 	}
 }
 
