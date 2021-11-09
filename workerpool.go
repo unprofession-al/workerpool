@@ -43,7 +43,7 @@ func (p *Pool) Run(progress bool) {
 			pgrs.SetOut(p.barOut)
 		}
 		pgrs.Start()
-		p.bar = uiprogress.AddBar(len(p.jobs))
+		p.bar = pgrs.AddBar(len(p.jobs))
 		p.bar.AppendCompleted()
 		p.bar.PrependElapsed()
 		p.bar.PrependFunc(func(b *uiprogress.Bar) string {
