@@ -36,6 +36,9 @@ func (p *Pool) Add(job func()) {
 }
 
 func (p *Pool) Run(progress bool) {
+	if len(p.jobs) < 1 {
+		return
+	}
 	var pgrs *uiprogress.Progress
 	if progress {
 		pgrs = uiprogress.New()
